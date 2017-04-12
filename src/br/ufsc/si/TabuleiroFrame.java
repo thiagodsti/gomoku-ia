@@ -1,5 +1,6 @@
 package br.ufsc.si;
 
+import java.awt.Component;
 import java.awt.GridLayout;
 
 import javax.swing.JFrame;
@@ -30,6 +31,19 @@ public class TabuleiroFrame extends JFrame {
 				});
 			}
 		}
+	}
+
+	public PosicaoBtn encontrarBotao(int linha, int coluna) {
+		for (Component c : contentPane.getComponents()) {
+			if (c instanceof PosicaoBtn) {
+				PosicaoBtn btn = (PosicaoBtn) c;
+				if (btn.getLinha() == linha && btn.getColuna() == coluna) {
+					return btn;
+				}
+
+			}
+		}
+		return null;
 	}
 
 }

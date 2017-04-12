@@ -13,8 +13,10 @@ public class Gomoku {
 	private Jogador jogador2;
 	private int[][] tabuleiro = new int[15][15];
 	private List<Posicao> jogadas;
+	private TabuleiroFrame frame;
 
-	public Gomoku() {
+	public void iniciarJogo(TabuleiroFrame frame) {
+		this.frame = frame;
 		jogador1 = new Jogador();
 		jogador1.setPeca("C");
 		jogador1.setTipo(JogadorTipo.COMPUTADOR);
@@ -27,17 +29,19 @@ public class Gomoku {
 
 		jogadas = new ArrayList<>();
 
+		// Jogador computador sempre começa no meio.
 		if (jogadorDaVez.getTipo().equals(JogadorTipo.COMPUTADOR)) {
-			jogarComputador();
+			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
+			btn.doClick();
 		}
 
 	}
 
 	// Valores para o IA
-	// dupla = 1 a 226
-	// dupla aberta = 226
-	// trinca = 227 a 452
-	// quadrupla 453 a 680
+	// peça -> 1 x 125
+	// dupla -> 126 * 49
+	// tripla -> 6175 * 25
+	// quadrupla-> 154.376
 
 	private void jogarComputador() {
 
@@ -54,6 +58,10 @@ public class Gomoku {
 					String.format("O jogador %s ganhou", jogadorDaVez.getTipo()));
 		}
 		passarVez();
+
+		if (jogadorDaVez.getTipo().equals(JogadorTipo.COMPUTADOR)) {
+			this.jogarComputador();
+		}
 	}
 
 	private boolean temGanhador() {

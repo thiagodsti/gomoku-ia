@@ -2,7 +2,7 @@ package br.ufsc.si;
 
 public enum JogadorTipo {
 
-	COMPUTADOR(1), HUMANO(2);
+	LIVRE(0), COMPUTADOR(1), HUMANO(2);
 
 	private int valor;
 

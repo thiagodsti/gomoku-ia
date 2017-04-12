@@ -12,6 +12,7 @@ public class Principal {
 			try {
 				Gomoku gomoku = new Gomoku();
 				TabuleiroFrame frame = new TabuleiroFrame(gomoku);
+				gomoku.iniciarJogo(frame);
 				frame.setVisible(true);
 			} catch (Exception e) {
 				e.printStackTrace();
