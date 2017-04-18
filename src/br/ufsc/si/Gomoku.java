@@ -7,11 +7,13 @@ import javax.swing.JOptionPane;
 
 public class Gomoku {
 
+	private static final int TOTAL_COLUNAS = 15;
+	private static final int TOTAL_LINHAS = 15;
 	private static final int TOTAL_PARA_GANHAR = 5;
 	private Jogador jogadorDaVez;
 	private Jogador jogador1;
 	private Jogador jogador2;
-	private int[][] tabuleiro = new int[15][15];
+	private int[][] tabuleiro = new int[TOTAL_LINHAS][TOTAL_COLUNAS];
 	private List<Posicao> jogadas;
 	private TabuleiroFrame frame;
 
@@ -31,8 +33,7 @@ public class Gomoku {
 
 		// Jogador computador sempre começa no meio.
 		if (jogadorDaVez.getTipo().equals(JogadorTipo.COMPUTADOR)) {
-			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
-			btn.doClick();
+			jogarComputador();
 		}
 
 	}
@@ -44,7 +45,37 @@ public class Gomoku {
 	// quadrupla-> 154.376
 
 	private void jogarComputador() {
-
+		int totalJogadas = jogadas.size();
+		Posicao ultimaPosicaoJogada = null;
+		if (totalJogadas > 0) {
+			ultimaPosicaoJogada = jogadas.get(totalJogadas-1);
+			int linhaInicial = ultimaPosicaoJogada.getLinha();
+			int colunaInicial = ultimaPosicaoJogada.getColuna();
+			int contLinha = 0;
+			int contColuna = 0;
+			//Percorro 2 linhas e colunas antes e 2 linhas e colunas depois da ulima jogada.
+			for (int linha=linhaInicial-2;contLinha<4;linha++, contLinha++){
+				if (linha<0) {
+					continue;
+				} else if (linha>=TOTAL_LINHAS) {
+					continue;
+				}
+				for (int coluna=colunaInicial-2;contColuna<4;coluna++, contColuna++) {
+					if (coluna<0) {
+						continue;
+					} else if (coluna>=TOTAL_COLUNAS) {
+						continue;
+					}
+					//Acho que aqui chama o minimax pra cada posição.
+					//minimax();
+				}
+			}
+		} else {
+			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
+			btn.doClick();
+		}
+		
+		
 	}
 
 	public void jogar(PosicaoBtn btn) {
