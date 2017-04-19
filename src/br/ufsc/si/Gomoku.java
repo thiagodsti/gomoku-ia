@@ -50,44 +50,20 @@ public class Gomoku {
 		int totalJogadas = jogadas.size();
 		Posicao ultimaPosicaoJogada = null;
 		if (totalJogadas > 0) {
-			ultimaPosicaoJogada = jogadas.get(totalJogadas-1);
-			int linhaInicial = ultimaPosicaoJogada.getLinha();
-			int colunaInicial = ultimaPosicaoJogada.getColuna();
-			int contLinha = 0;
-			int contColuna = 0;
-			//Percorro 2 linhas e colunas antes e 2 linhas e colunas depois da ulima jogada.
-			for (int linha=linhaInicial-2;contLinha<4;linha++, contLinha++){
-				if (linha<0) {
-					continue;
-				} else if (linha>=TOTAL_LINHAS) {
-					continue;
-				}
-				for (int coluna=colunaInicial-2;contColuna<4;coluna++, contColuna++) {
-					if (coluna<0) {
-						continue;
-					} else if (coluna>=TOTAL_COLUNAS) {
-						continue;
-					}
-					
-					//int[][] tabuleiroTmp = mover(tabuleiro, jogadorDaVez.getTipo().getValor(), linha, coluna);
-					//Acho que aqui chama o minimax pra cada posição.
-					Posicao melhorPosicao = new Posicao(linha, coluna);
-					melhorPosicao = minimax(melhorPosicao, 3, true, MENOS_INFINITO, MAIS_INFINITO);
-					//minimax();
-				}
-			}
+			ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
+			Posicao melhorPosicao = minimax(ultimaPosicaoJogada, 3, true, MENOS_INFINITO, MAIS_INFINITO);
+			this.frame.encontrarBotao(melhorPosicao.getLinha(), melhorPosicao.getColuna()).doClick();
 		} else {
 			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
 			btn.doClick();
 		}
-		
-		
+
 	}
 
 	private int[][] mover(int[][] tabuleiro, int jogador, int linha, int coluna) {
 		int[][] tabuleiroTmp = new int[15][15];
-		for (int i=0;i<tabuleiro.length;i++) {
-			for (int j=0;j<tabuleiro[i].length;j++) {
+		for (int i = 0; i < tabuleiro.length; i++) {
+			for (int j = 0; j < tabuleiro[i].length; j++) {
 				tabuleiroTmp[i][j] = tabuleiro[i][j];
 			}
 		}
@@ -97,35 +73,148 @@ public class Gomoku {
 		return tabuleiroTmp;
 	}
 
-	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, double alpha, double beta) {
-		int heuristica = 0;
-		if (profundidade == 0 ) {
-			return posicao;
+	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, long alpha, long beta) {
+		if (profundidade == 0) {
+			return avaliar(posicao);
 		}
-		
+
+		int moverLinha = -1;
+		int moverColuna = -1;
+		int total = 1;
+
 		if (maximizar) {
-			int melhorValor = MENOS_INFINITO;
-			for (int i=0;i<5;i++) {
-				//tabuleiroTmp = mover(tabuleiroTmp, JogadorTipo.COMPUTADOR.getValor(), melhorPosicao.getLinha(), melhorPosicao.getColuna()+1);
-			//	para cada filho (até 5 de cada lado que puder andar com espaço livre)
-			//	tabuleiroFilho = movimentacao;
-				//double melhorValor = max(melhorValor, melhorPosicao.getScore());
-				//if (melhorValor > alpha) {
-				//	melhorPosicao = melhor;
-				//}
-				//Posicao melhor = minimax(tabuleiroTmp, melhorPosicao, profundidade - 1, false, alpha, beta);
+			Posicao filho = pegarProximoFilho(posicao, moverLinha, moverColuna, total);
+			Posicao melhor = minimax(filho, profundidade - 1, !maximizar, alpha, beta);
+			if (melhor.getHeuristica() > alpha) {
+				alpha = melhor.getHeuristica();
+				posicao = melhor;
 			}
-			//
-			// if (melhorValor > alpha )
-			// alpha = melhorValor;
-			// melhorPosicao = melhor;
-			//
+
+			if (alpha > beta) {
+				profundidade = 0;
+			}
+		} else {
+			Posicao filho = pegarProximoFilho(posicao, moverLinha, moverColuna, total);
+			Posicao melhor = minimax(filho, profundidade - 1, !maximizar, alpha, beta);
+			if (melhor.getHeuristica() < beta) {
+				beta = melhor.getHeuristica();
+				posicao = melhor;
+			}
 		}
-		
+
 		return posicao;
-		
+
 	}
+
+	private Posicao pegarProximoFilho(Posicao posicao, int moverLinha, int moverColuna, int total) {
+		Posicao filho = null;
+
+		int linha = posicao.getLinha() + moverLinha * total;
+		int coluna = posicao.getColuna() + moverColuna;
+		if (linha < 0) {
+			linha = 0;
+		}
+		if (coluna < 0) {
+			coluna = 0;
+		}
+		if (linha >= TOTAL_LINHAS) {
+			linha = TOTAL_LINHAS - 1;
+		}
+		if (coluna >= TOTAL_COLUNAS) {
+			coluna = TOTAL_COLUNAS - 1;
+		}
+
+		int jogador = tabuleiro[linha][coluna];
+		if (moverLinha < total) {
+			moverLinha++;
+		} else {
+			moverColuna++;
+		}
+		if (jogador == JogadorTipo.LIVRE.getValor()) {
+			filho = new Posicao(linha, coluna);
+			return filho;
+		} else {
+			if (moverColuna == moverLinha) {
+				return pegarProximoFilho(posicao, total * -1, total * -1);
+			}
+			return pegarProximoFilho(posicao, moverLinha, moverColuna, total);
+		}
+
+	}
+
+	private Posicao pegarProximoFilho(Posicao posicao, int contLinha, int contColuna) {
+		if (contColuna + 1 > contLinha) {
+
+			return new Posicao(posicao.getLinha() + 1, posicao.getColuna());
+		}
+		return null;
+	}
+
+	private Posicao avaliar(Posicao posicao) {
+		return posicao;
+	}
+
+	/**
+	 * Evaluates the board for a given player. Returns an integer representing
+	 * the score, as well as the set of sequences for the player.
+	 */
+	/*
+	public static Pair<Integer,Set<Sequence>> evaluate(Board board, int player) {
 	
+		Set<Sequence> sequences = findSequences(board, player);
+		int currentPlayer = board.getCurrentPlayer();
+		int attacks = 0, finalscore = 0;
+		boolean victory = false;
+	
+		for (Sequence s : sequences) {
+	
+			switch(s.pieces.size()) {
+			// One piece sequence
+			case 1:
+				finalscore++;
+				break;
+			// Two piece sequence
+			case 2:
+				if (s.isConsecutive()) {
+					finalscore += 5;
+				} else {
+					finalscore += 3;
+				}
+				break;
+			// Three piece sequence
+			case 3:
+				if (s.blocked() == 0) {
+					finalscore += 5;
+					attacks++;
+					if (currentPlayer == player) {
+						finalscore += 500;
+					}
+				}
+				break;
+			// Four piece sequence
+			case 4:
+				finalscore += 10;
+				attacks++;
+				if (currentPlayer == player) {
+					finalscore += 1500;
+				} else if (s.blocked() == 0 && s.isConsecutive()) {
+					finalscore += 750;
+				}
+				break;
+			// Five piece sequence
+			default:
+				if (s.isConsecutive()) {
+					finalscore += 5000;
+				}
+				break;
+			}
+		}
+		if (attacks >= 2 && finalscore < 1000) {
+			finalscore += 500;
+		}
+		return new Pair<Integer,Set<Sequence>>(finalscore,sequences);
+	} */
+
 	private boolean jogadorGanhou(int[][] tabuleiro, int valor, int linha, int coluna) {
 		int posicaoValor = valor;
 
@@ -139,7 +228,8 @@ public class Gomoku {
 
 		linhaMover = 1;
 		colunaMover = 0;
-		boolean vertical = buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR, posicaoValor);
+		boolean vertical = buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR,
+				posicaoValor);
 		if (vertical) {
 			return true;
 		}
@@ -173,11 +263,13 @@ public class Gomoku {
 		if (temGanhador()) {
 			JOptionPane.showMessageDialog(btn.getParent(),
 					String.format("O jogador %s ganhou", jogadorDaVez.getTipo()));
-		}
-		passarVez();
-
-		if (jogadorDaVez.getTipo().equals(JogadorTipo.COMPUTADOR)) {
-			this.jogarComputador();
+			frame.dispose();
+			System.exit(0);
+		} else {
+			passarVez();
+			if (jogadorDaVez.getTipo().equals(JogadorTipo.COMPUTADOR)) {
+				this.jogarComputador();
+			}
 		}
 	}
 
@@ -189,15 +281,16 @@ public class Gomoku {
 
 			int linhaMover = 0;
 			int colunaMover = 1;
-			boolean horizontal = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR,
-					jogador);
+			boolean horizontal = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover,
+					TOTAL_PARA_GANHAR, jogador);
 			if (horizontal) {
 				return true;
 			}
 
 			linhaMover = 1;
 			colunaMover = 0;
-			boolean vertical = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR, jogador);
+			boolean vertical = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR,
+					jogador);
 			if (vertical) {
 				return true;
 			}
@@ -205,8 +298,8 @@ public class Gomoku {
 			// Busca diagonais de baixo pra cima e pra esquerda.
 			linhaMover = 1;
 			colunaMover = 1;
-			boolean diagonalEsquerda = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR,
-					jogador);
+			boolean diagonalEsquerda = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover,
+					TOTAL_PARA_GANHAR, jogador);
 			if (diagonalEsquerda) {
 				return true;
 			}
@@ -216,8 +309,8 @@ public class Gomoku {
 			// Busca diagonais de cima pra baixo e pra direita.
 			linhaMover = 1;
 			colunaMover = -1;
-			boolean diagonalDireita = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover, TOTAL_PARA_GANHAR,
-					jogador);
+			boolean diagonalDireita = buscarPosicoes(this.tabuleiro, linha, coluna, linhaMover, colunaMover,
+					TOTAL_PARA_GANHAR, jogador);
 			if (diagonalDireita) {
 				return true;
 			}
@@ -227,8 +320,8 @@ public class Gomoku {
 	}
 
 	// Helper pra buscar posicoes.
-	private boolean buscarPosicoes(int[][] tabuleiro, int linhaInicial, int colunaInicial, int linhaMover, int colunaMover,
-			int totalBuscar, int valorBuscar) {
+	private boolean buscarPosicoes(int[][] tabuleiro, int linhaInicial, int colunaInicial, int linhaMover,
+			int colunaMover, int totalBuscar, int valorBuscar) {
 		for (int cont = 0; cont < totalBuscar; cont++) {
 			int linha = linhaInicial + cont * linhaMover;
 			int coluna = colunaInicial + cont * colunaMover;
@@ -242,7 +335,8 @@ public class Gomoku {
 	}
 
 	// Helper pra buscar posicoes.
-	private int buscarPosicoes(int tabuleiro[][], int linhaInicial, int colunaInicial, int linhaMover, int colunaMover, int valorBuscar) {
+	private int buscarPosicoes(int tabuleiro[][], int linhaInicial, int colunaInicial, int linhaMover, int colunaMover,
+			int valorBuscar) {
 		int totalAchado = 0;
 		for (int cont = 0; cont < TOTAL_PARA_GANHAR; cont++) {
 			int linha = linhaInicial + cont * linhaMover;

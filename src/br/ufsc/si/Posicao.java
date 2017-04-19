@@ -5,7 +5,7 @@ public class Posicao {
 	private int jogador;
 	private int linha;
 	private int coluna;
-	private int heuristica;
+	private long heuristica;
 
 	public Posicao(int linha, int coluna) {
 		this.setLinha(linha);
@@ -21,7 +21,7 @@ public class Posicao {
 	public int getJogador() {
 		return jogador;
 	}
-	
+
 	public void setJogador(int jogador) {
 		this.jogador = jogador;
 	}
@@ -42,12 +42,17 @@ public class Posicao {
 		this.coluna = coluna;
 	}
 
-	public int getHeuristica() {
+	public long getHeuristica() {
 		return heuristica;
 	}
-	
-	public void setHeuristica(int heuristica) {
+
+	public void setHeuristica(long heuristica) {
 		this.heuristica = heuristica;
+	}
+
+	@Override
+	public String toString() {
+		return "Linha: " + linha + " Coluna: " + coluna + " Heuristica: " + heuristica;
 	}
 
 }
