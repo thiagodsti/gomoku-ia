@@ -18,6 +18,7 @@ public class Gomoku {
 	private int[][] tabuleiro = new int[TOTAL_LINHAS][TOTAL_COLUNAS];
 	private List<Posicao> jogadas;
 	private TabuleiroFrame frame;
+	private Posicao ultimaPosicaoJogada;
 
 	public void iniciarJogo(TabuleiroFrame frame) {
 		this.frame = frame;
@@ -29,7 +30,7 @@ public class Gomoku {
 		jogador2.setPeca("H");
 		jogador2.setTipo(JogadorTipo.HUMANO);
 
-		jogadorDaVez = jogador1;
+		jogadorDaVez = jogador2;
 
 		jogadas = new ArrayList<>();
 
@@ -48,10 +49,13 @@ public class Gomoku {
 
 	private void jogarComputador() {
 		int totalJogadas = jogadas.size();
-		Posicao ultimaPosicaoJogada = null;
 		if (totalJogadas > 0) {
-			ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
-			Posicao melhorPosicao = minimax(ultimaPosicaoJogada, 3, true, MENOS_INFINITO, MAIS_INFINITO);
+			if (jogadas.get(0).getJogador() == JogadorTipo.COMPUTADOR.getValor()) {
+				this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 2);
+			} else {
+				this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
+			}
+			Posicao melhorPosicao = minimax(this.ultimaPosicaoJogada, 3, true, MENOS_INFINITO, MAIS_INFINITO);
 			this.frame.encontrarBotao(melhorPosicao.getLinha(), melhorPosicao.getColuna()).doClick();
 		} else {
 			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
@@ -84,7 +88,9 @@ public class Gomoku {
 
 		if (maximizar) {
 			Posicao filho = pegarProximoFilho(posicao, moverLinha, moverColuna, total);
-			Posicao melhor = minimax(filho, profundidade - 1, !maximizar, alpha, beta);
+			moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.COMPUTADOR);
+			Posicao melhor = minimax(filho, profundidade - 1, false, alpha, beta);
+			moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.LIVRE);
 			if (melhor.getHeuristica() > alpha) {
 				alpha = melhor.getHeuristica();
 				posicao = melhor;
@@ -95,7 +101,9 @@ public class Gomoku {
 			}
 		} else {
 			Posicao filho = pegarProximoFilho(posicao, moverLinha, moverColuna, total);
-			Posicao melhor = minimax(filho, profundidade - 1, !maximizar, alpha, beta);
+			moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.HUMANO);
+			Posicao melhor = minimax(filho, profundidade - 1, true, alpha, beta);
+			moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.LIVRE);
 			if (melhor.getHeuristica() < beta) {
 				beta = melhor.getHeuristica();
 				posicao = melhor;
@@ -106,11 +114,13 @@ public class Gomoku {
 
 	}
 
-	private Posicao pegarProximoFilho(Posicao posicao, int moverLinha, int moverColuna, int total) {
-		Posicao filho = null;
+	private void moverPosicaoTabuleiroPrincipal(Posicao posicao, JogadorTipo jogador) {
+		tabuleiro[posicao.getLinha()][posicao.getColuna()] = jogador.getValor();
+	}
 
-		int linha = posicao.getLinha() + moverLinha * total;
-		int coluna = posicao.getColuna() + moverColuna;
+	private Posicao pegarProximoFilho(Posicao posicao, int moverLinha, int moverColuna, int casasParaVerificar) {
+		int linha = this.ultimaPosicaoJogada.getLinha() + moverLinha * casasParaVerificar;
+		int coluna = this.ultimaPosicaoJogada.getColuna() + moverColuna;
 		if (linha < 0) {
 			linha = 0;
 		}
@@ -125,29 +135,23 @@ public class Gomoku {
 		}
 
 		int jogador = tabuleiro[linha][coluna];
-		if (moverLinha < total) {
+		if (moverLinha < casasParaVerificar) {
 			moverLinha++;
-		} else {
+		} else if (moverColuna < casasParaVerificar) {
 			moverColuna++;
+		} else if (moverColuna == moverLinha){
+			casasParaVerificar++;
+			moverColuna = casasParaVerificar * -1;
+			moverLinha = casasParaVerificar * -1;
+			return pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
 		}
 		if (jogador == JogadorTipo.LIVRE.getValor()) {
-			filho = new Posicao(linha, coluna);
-			return filho;
-		} else {
-			if (moverColuna == moverLinha) {
-				return pegarProximoFilho(posicao, total * -1, total * -1);
-			}
-			return pegarProximoFilho(posicao, moverLinha, moverColuna, total);
+			return new Posicao(linha, coluna);
 		}
+		
+		return pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
+		
 
-	}
-
-	private Posicao pegarProximoFilho(Posicao posicao, int contLinha, int contColuna) {
-		if (contColuna + 1 > contLinha) {
-
-			return new Posicao(posicao.getLinha() + 1, posicao.getColuna());
-		}
-		return null;
 	}
 
 	private Posicao avaliar(Posicao posicao) {
