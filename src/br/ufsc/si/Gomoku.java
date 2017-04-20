@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 
 public class Gomoku {
 
+	private static final int PROFUNDIDADE = 5;
 	private static final int TOTAL_COLUNAS = 15;
 	private static final int TOTAL_LINHAS = 15;
 	private static final int TOTAL_PARA_GANHAR = 5;
@@ -30,7 +31,7 @@ public class Gomoku {
 		jogador2.setPeca("H");
 		jogador2.setTipo(JogadorTipo.HUMANO);
 
-		jogadorDaVez = jogador2;
+		jogadorDaVez = jogador1;
 
 		jogadas = new ArrayList<>();
 
@@ -41,12 +42,6 @@ public class Gomoku {
 
 	}
 
-	// Valores para o IA
-	// peça -> 1 x 125
-	// dupla -> 126 * 49
-	// tripla -> 6175 * 25
-	// quadrupla-> 154.376
-
 	private void jogarComputador() {
 		int totalJogadas = jogadas.size();
 		if (totalJogadas > 0) {
@@ -55,26 +50,14 @@ public class Gomoku {
 			} else {
 				this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
 			}
-			Posicao melhorPosicao = minimax(this.ultimaPosicaoJogada, 3, true, MENOS_INFINITO, MAIS_INFINITO);
+			Posicao melhorPosicao = minimax(this.ultimaPosicaoJogada, PROFUNDIDADE, true, MENOS_INFINITO,
+					MAIS_INFINITO);
 			this.frame.encontrarBotao(melhorPosicao.getLinha(), melhorPosicao.getColuna()).doClick();
 		} else {
 			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
 			btn.doClick();
 		}
 
-	}
-
-	private int[][] mover(int[][] tabuleiro, int jogador, int linha, int coluna) {
-		int[][] tabuleiroTmp = new int[15][15];
-		for (int i = 0; i < tabuleiro.length; i++) {
-			for (int j = 0; j < tabuleiro[i].length; j++) {
-				tabuleiroTmp[i][j] = tabuleiro[i][j];
-			}
-		}
-		if (tabuleiroTmp[linha][coluna] == 0) {
-			tabuleiroTmp[linha][coluna] = jogador;
-		}
-		return tabuleiroTmp;
 	}
 
 	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, long alpha, long beta) {
@@ -95,7 +78,7 @@ public class Gomoku {
 				alpha = melhor.getHeuristica();
 				posicao = melhor;
 			}
-
+			
 			if (alpha > beta) {
 				profundidade = 0;
 			}
@@ -107,6 +90,10 @@ public class Gomoku {
 			if (melhor.getHeuristica() < beta) {
 				beta = melhor.getHeuristica();
 				posicao = melhor;
+			}
+
+			if (alpha > beta) {
+				profundidade = 0;
 			}
 		}
 
@@ -139,7 +126,7 @@ public class Gomoku {
 			moverLinha++;
 		} else if (moverColuna < casasParaVerificar) {
 			moverColuna++;
-		} else if (moverColuna == moverLinha){
+		} else if (moverColuna == moverLinha) {
 			casasParaVerificar++;
 			moverColuna = casasParaVerificar * -1;
 			moverLinha = casasParaVerificar * -1;
@@ -148,13 +135,67 @@ public class Gomoku {
 		if (jogador == JogadorTipo.LIVRE.getValor()) {
 			return new Posicao(linha, coluna);
 		}
-		
+
 		return pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
-		
 
 	}
 
+	// Valores para o IA
+	// peça -> 1
+	// dupla-fechada -> 63
+	// dupla -> 126
+	// tipla-fechada -> 3.086
+	// tripla -> 6.175
+	// quadrupla-fechada -> 77.188
+	// quadrupla-> 154.376
 	private Posicao avaliar(Posicao posicao) {
+		int linha = posicao.getLinha();
+		int coluna = posicao.getColuna();
+
+		List<Integer> achados = new ArrayList<>();
+
+		int linhaMover = 0;
+		int colunaMover = 1;
+		int posicaoValor = jogadorDaVez.getTipo().getValor();
+		achados.add(buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+
+		linhaMover = 1;
+		colunaMover = 0;
+		achados.add(buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+
+		// Busca diagonais de baixo pra cima e pra esquerda.
+		linhaMover = 1;
+		colunaMover = 1;
+		achados.add(buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+
+		// Busca diagonais de cima pra baixo e pra direita.
+		linhaMover = 1;
+		colunaMover = -1;
+		achados.add(buscarPosicoes(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+
+		long total = 0;
+
+		for (Integer valor : achados) {
+			switch (valor) {
+			case 1:
+				total++;
+				break;
+			case 2:
+				total = total + 126;
+				break;
+			case 3:
+				total = total + 6175;
+				break;
+			case 4:
+				total = total + 154376;
+				break;
+			case 5:
+				total = Long.MAX_VALUE;
+			}
+		}
+
+		posicao.setHeuristica(total);
+
 		return posicao;
 	}
 
