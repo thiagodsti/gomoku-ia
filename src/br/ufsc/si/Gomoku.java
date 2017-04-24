@@ -62,28 +62,24 @@ public class Gomoku {
 
 	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, long alpha, long beta) {
 
-		int moverLinha = -1;
-		int moverColuna = -1;
-		int total = 1;
-
 		List<Posicao> posicoesLivres = pegarFilhosProximos(posicao);
 
-		if (profundidade == 0 || total == 5) {
+		Posicao melhor;
+		if (profundidade == 0) {
 			return avaliar(posicao);
 		} else {
 			for (Posicao filho : posicoesLivres) {
 				//Posicao filho = pegarProximoFilho(posicao, moverLinha, moverColuna, total);
 				if (maximizar) {
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.COMPUTADOR);
-					Posicao melhor = minimax(filho, profundidade - 1, false, alpha, beta);
-
+					melhor = minimax(filho, profundidade - 1, false, alpha, beta);
 					if (melhor.getHeuristica() > alpha) {
 						alpha = melhor.getHeuristica();
 						posicao = melhor;
 					}
 				} else {
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.HUMANO);
-					Posicao melhor = minimax(filho, profundidade - 1, true, alpha, beta);
+					melhor = minimax(filho, profundidade - 1, true, alpha, beta);
 					if (melhor.getHeuristica() < beta) {
 						beta = melhor.getHeuristica();
 						posicao = melhor;
@@ -97,39 +93,41 @@ public class Gomoku {
 					break;
 				}
 			}
-			;//while (alpha < beta);
+			return posicao;
 		}
-
-		return posicao;
-
 	}
 
 	private List<Posicao> pegarFilhosProximos(Posicao posicao) {
 		List<Posicao> posicoes = new ArrayList<>();
 
-		for (int i = -3; i < 3; i++) {
-			int linha = this.ultimaPosicaoJogada.getLinha() + i;
-			if (linha < 0) {
-				linha = 0;
-			}
-			if (linha >= TOTAL_LINHAS) {
-				linha = TOTAL_LINHAS - 1;
-			}
-			for (int j = -3; j < 3; j++) {
-				int coluna = this.ultimaPosicaoJogada.getColuna() + j;
-				if (coluna < 0) {
-					coluna = 0;
-				}
-				if (coluna >= TOTAL_COLUNAS) {
-					coluna = TOTAL_COLUNAS - 1;
-				}
+		int moverLinha = -1;
+		int moverColuna = -1;
 
-				Posicao posicaoEncontrada = new Posicao(linha, coluna);
-				if (jogadas.contains(posicaoEncontrada) || posicoes.contains(posicaoEncontrada)) {
-					continue;
+		for (int movimentos = 1; movimentos < 4; movimentos++) {
+			for (int i = moverLinha; i < movimentos; i++) {
+				int linha = this.ultimaPosicaoJogada.getLinha() + i;
+				if (linha < 0) {
+					linha = 0;
 				}
+				if (linha >= TOTAL_LINHAS) {
+					linha = TOTAL_LINHAS - 1;
+				}
+				for (int j = moverColuna; j < movimentos; j++) {
+					int coluna = this.ultimaPosicaoJogada.getColuna() + j;
+					if (coluna < 0) {
+						coluna = 0;
+					}
+					if (coluna >= TOTAL_COLUNAS) {
+						coluna = TOTAL_COLUNAS - 1;
+					}
 
-				posicoes.add(posicaoEncontrada);
+					Posicao posicaoEncontrada = new Posicao(linha, coluna);
+					if (jogadas.contains(posicaoEncontrada) || posicoes.contains(posicaoEncontrada)) {
+						continue;
+					}
+
+					posicoes.add(posicaoEncontrada);
+				}
 			}
 		}
 
@@ -235,32 +233,48 @@ public class Gomoku {
 	private Posicao avaliar(Posicao posicao) {
 		int linha = posicao.getLinha();
 		int coluna = posicao.getColuna();
-		int posicaoValor = jogadorDaVez.getTipo().getValor();
-		int heuristica = 0;
 
-		List<Integer> achados = new ArrayList<>();
+		int jogador = posicao.getJogador();
+		int adversario;
+		if (jogador == JogadorTipo.COMPUTADOR.getValor()) {
+			adversario = JogadorTipo.HUMANO.getValor();
+		} else {
+			adversario = JogadorTipo.COMPUTADOR.getValor();
+		}
+
+		List<Integer> achadosJogador = new ArrayList<>();
+		List<Integer> achadosAdversario = new ArrayList<>();
 
 		int linhaMover = 0;
 		int colunaMover = 1;
-		achados.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+		achadosJogador.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, jogador));
+		achadosAdversario
+				.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, adversario));
 
 		linhaMover = 1;
 		colunaMover = 0;
-		achados.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+		achadosJogador.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, jogador));
+		achadosAdversario
+				.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, adversario));
 
 		// Busca diagonais de baixo pra cima e pra esquerda.
 		linhaMover = 1;
 		colunaMover = 1;
-		achados.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+		achadosJogador.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, jogador));
+		achadosAdversario
+				.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, adversario));
 
 		// Busca diagonais de cima pra baixo e pra direita.
 		linhaMover = 1;
 		colunaMover = -1;
-		achados.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, posicaoValor));
+		achadosJogador.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, jogador));
+		achadosAdversario
+				.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, adversario));
 
 		long total = 0;
+		long totalAdversario = 0;
 
-		for (Integer valor : achados) {
+		for (Integer valor : achadosJogador) {
 			switch (valor) {
 			case 1:
 				total++;
@@ -279,7 +293,26 @@ public class Gomoku {
 			}
 		}
 
-		posicao.setHeuristica(total);
+		for (Integer valor : achadosAdversario) {
+			switch (valor) {
+			case 1:
+				totalAdversario++;
+				break;
+			case 2:
+				totalAdversario = totalAdversario + 126;
+				break;
+			case 3:
+				totalAdversario = totalAdversario + 6175;
+				break;
+			case 4:
+				totalAdversario = totalAdversario + 154376;
+				break;
+			case 5:
+				totalAdversario = Long.MAX_VALUE;
+			}
+		}
+
+		posicao.setHeuristica(total - totalAdversario);
 
 		return posicao;
 	}
@@ -411,13 +444,15 @@ public class Gomoku {
 		for (int cont = 0; cont < TOTAL_PARA_GANHAR; cont++) {
 			int linha = linhaInicial + cont * linhaMover;
 			int coluna = colunaInicial + cont * colunaMover;
-			if (linha < 0 || coluna < 0 || linha >= tabuleiro.length || coluna >= tabuleiro[linha].length
-					|| tabuleiro[linha][coluna] != valorBuscar) {
-				totalAchado--;
+			if (linha < 0 || coluna < 0 || linha >= TOTAL_LINHAS || coluna >= TOTAL_COLUNAS) {
+				return -1;
+			} else if (tabuleiro[linha][coluna] == JogadorTipo.LIVRE.getValor()) {
 				continue;
+			} else if (tabuleiro[linha][coluna] == valorBuscar) {
+				totalAchado++;
+			} else {
+				return -1;
 			}
-
-			totalAchado++;
 		}
 		return totalAchado;
 	}
