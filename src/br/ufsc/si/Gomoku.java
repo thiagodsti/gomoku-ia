@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 
 public class Gomoku {
 
-	private static final int PROFUNDIDADE = 3;
+	private static final int PROFUNDIDADE = 5;
 	private static final int TOTAL_COLUNAS = 15;
 	private static final int TOTAL_LINHAS = 15;
 	private static final int TOTAL_PARA_GANHAR = 5;
@@ -67,7 +67,7 @@ public class Gomoku {
 		List<Posicao> posicoesLivres = pegarFilhosProximos(posicao);
 
 		Posicao melhor;
-		if (profundidade == 0) {
+		if (profundidade == 0 || jogadorGanhou(tabuleiro, posicao.getJogador(), posicao.linha, posicao.coluna)) {
 			return avaliar(posicao);
 		} else {
 			for (Posicao filho : posicoesLivres) {
@@ -180,14 +180,14 @@ public class Gomoku {
 				break;
 			case 2:
 				dupla++;
-				total = 200 / pontuacao.distancia;
+				total = 200;
 				break;
 			case 3:
 				tripla++;
-				total = 7000 / pontuacao.distancia;
+				total = 7000;
 				break;
 			case 4:
-				total = 200000 / pontuacao.distancia;
+				total = 200000;
 				break;
 			default:
 				total = 200000000;
@@ -208,7 +208,7 @@ public class Gomoku {
 			case 4:
 				totalAdv = 200000;
 				break;
-			default:
+			case 5:
 				totalAdv = 200000000;
 		}
 
