@@ -2,10 +2,10 @@ package br.ufsc.si;
 
 public class Posicao {
 
-	private int jogador;
-	private int linha;
-	private int coluna;
-	private long heuristica;
+	int jogador;
+	int linha;
+	int coluna;
+	double heuristica;
 
 	public Posicao(int linha, int coluna) {
 		this.setLinha(linha);
@@ -40,14 +40,6 @@ public class Posicao {
 
 	public void setColuna(int coluna) {
 		this.coluna = coluna;
-	}
-
-	public long getHeuristica() {
-		return heuristica;
-	}
-
-	public void setHeuristica(long heuristica) {
-		this.heuristica = heuristica;
 	}
 
 	@Override

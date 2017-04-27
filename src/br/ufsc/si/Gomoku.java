@@ -7,7 +7,7 @@ import javax.swing.JOptionPane;
 
 public class Gomoku {
 
-	private static final int PROFUNDIDADE = 5;
+	private static final int PROFUNDIDADE = 3;
 	private static final int TOTAL_COLUNAS = 15;
 	private static final int TOTAL_LINHAS = 15;
 	private static final int TOTAL_PARA_GANHAR = 5;
@@ -51,7 +51,7 @@ public class Gomoku {
 			this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
 			Posicao melhorPosicao2 = minimax(this.ultimaPosicaoJogada, PROFUNDIDADE, true, MENOS_INFINITO,
 					MAIS_INFINITO);
-			if (melhorPosicao2.getHeuristica() > melhorPosicao.getHeuristica()) {
+			if (melhorPosicao2.heuristica > melhorPosicao.heuristica) {
 				melhorPosicao = melhorPosicao2;
 			}
 			this.frame.encontrarBotao(melhorPosicao.getLinha(), melhorPosicao.getColuna()).doClick();
@@ -62,7 +62,7 @@ public class Gomoku {
 
 	}
 
-	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, long alpha, long beta) {
+	private Posicao minimax(Posicao posicao, int profundidade, boolean maximizar, double alpha, double beta) {
 
 		List<Posicao> posicoesLivres = pegarFilhosProximos(posicao);
 
@@ -76,16 +76,16 @@ public class Gomoku {
 					filho.setJogador(JogadorTipo.COMPUTADOR.getValor());
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.COMPUTADOR);
 					melhor = minimax(filho, profundidade - 1, false, alpha, beta);
-					if (melhor.getHeuristica() > alpha) {
-						alpha = melhor.getHeuristica();
+					if (melhor.heuristica > alpha) {
+						alpha = melhor.heuristica;
 						posicao = melhor;
 					}
 				} else {
 					filho.setJogador(JogadorTipo.HUMANO.getValor());
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.HUMANO);
 					melhor = minimax(filho, profundidade - 1, true, alpha, beta);
-					if (melhor.getHeuristica() < beta) {
-						beta = melhor.getHeuristica();
+					if (melhor.heuristica < beta) {
+						beta = melhor.heuristica;
 						posicao = melhor;
 					}
 				}
@@ -138,92 +138,8 @@ public class Gomoku {
 		return posicoes;
 	}
 
-	/*private List<Posicao> pegarFilhosProximos(Posicao posicao, int moverLinha, int moverColuna,
-			int casasParaVerificar) {
-		List<Posicao> posicoes = new ArrayList<>();
-		
-		for (int i=0;i<30;i++) {
-			int linha = this.ultimaPosicaoJogada.getLinha() + moverLinha * casasParaVerificar;
-			int coluna = this.ultimaPosicaoJogada.getColuna() + moverColuna * casasParaVerificar;
-			if (linha < 0) {
-				linha = 0;
-			}
-			if (coluna < 0) {
-				coluna = 0;
-			}
-			if (linha >= TOTAL_LINHAS) {
-				linha = TOTAL_LINHAS - 1;
-			}
-			if (coluna >= TOTAL_COLUNAS) {
-				coluna = TOTAL_COLUNAS - 1;
-			}
-	
-			int jogador = tabuleiro[linha][coluna];
-			if (moverLinha < casasParaVerificar) {
-				moverLinha++;
-			} else if (moverColuna < casasParaVerificar) {
-				moverColuna++;
-			} else if (moverColuna == moverLinha) {
-				casasParaVerificar++;
-				moverColuna = casasParaVerificar * -1;
-				moverLinha = casasParaVerificar * -1;
-				pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
-			}
-			if (jogador == JogadorTipo.LIVRE.getValor()) {
-				return new Posicao(linha, coluna);
-			}
-		}
-	} */
-
-	private List<Posicao> obterPosicoesLivres() {
-		List<Posicao> posicoes = new ArrayList<>();
-		for (int i = 0; i < 15; i++) {
-			for (int j = 0; j < 15; j++) {
-				if (tabuleiro[i][j] == JogadorTipo.LIVRE.getValor()) {
-					posicoes.add(new Posicao(i, j));
-				}
-			}
-		}
-		return posicoes;
-	}
-
 	private void moverPosicaoTabuleiroPrincipal(Posicao posicao, JogadorTipo jogador) {
 		tabuleiro[posicao.getLinha()][posicao.getColuna()] = jogador.getValor();
-	}
-
-	private Posicao pegarProximoFilho(Posicao posicao, int moverLinha, int moverColuna, int casasParaVerificar) {
-		int linha = this.ultimaPosicaoJogada.getLinha() + moverLinha * casasParaVerificar;
-		int coluna = this.ultimaPosicaoJogada.getColuna() + moverColuna * casasParaVerificar;
-		if (linha < 0) {
-			linha = 0;
-		}
-		if (coluna < 0) {
-			coluna = 0;
-		}
-		if (linha >= TOTAL_LINHAS) {
-			linha = TOTAL_LINHAS - 1;
-		}
-		if (coluna >= TOTAL_COLUNAS) {
-			coluna = TOTAL_COLUNAS - 1;
-		}
-
-		int jogador = tabuleiro[linha][coluna];
-		if (moverLinha < casasParaVerificar) {
-			moverLinha++;
-		} else if (moverColuna < casasParaVerificar) {
-			moverColuna++;
-		} else if (moverColuna == moverLinha) {
-			casasParaVerificar++;
-			moverColuna = casasParaVerificar * -1;
-			moverLinha = casasParaVerificar * -1;
-			return pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
-		}
-		if (jogador == JogadorTipo.LIVRE.getValor()) {
-			return new Posicao(linha, coluna);
-		}
-
-		return pegarProximoFilho(posicao, moverLinha, moverColuna, casasParaVerificar);
-
 	}
 
 	// Valores para o IA
@@ -235,215 +151,204 @@ public class Gomoku {
 	// quadrupla-fechada -> 77.188
 	// quadrupla-> 154.376
 	private Posicao avaliar(Posicao posicao) {
-		int linha = posicao.getLinha();
-		int coluna = posicao.getColuna();
-
 		int jogador = posicao.getJogador();
-		int adversario;
-		if (jogador == JogadorTipo.COMPUTADOR.getValor()) {
-			adversario = JogadorTipo.HUMANO.getValor();
-		} else {
-			adversario = JogadorTipo.COMPUTADOR.getValor();
-		}
 
-		List<Integer> achadosJogador = new ArrayList<>();
-		List<Integer> achadosAdversario = new ArrayList<>();
+		Pontuacao pontosHorizontal = avaliarHorizontal(posicao, jogador);
+		Pontuacao pontosVertical = avaliarVertical(posicao, jogador);
+		Pontuacao pontosDiagonal = avaliarDiagonalMesmoSentido(posicao, jogador);
+		Pontuacao pontosDiagonalInversa = avaliarDiagonalInversa(posicao, jogador);
+		posicao.heuristica = pontosHorizontal.total + pontosVertical.total + pontosDiagonal.total
+				+ pontosDiagonalInversa.total;
 
-		Pontuacao pontosHorizontal = avaliarHorizontal(linha, coluna, jogador);
-		Pontuacao pontosHorizontalAdv = avaliarHorizontal(linha, coluna, adversario);
-
-		Pontuacao pontosVertical = avaliarVertical(linha, coluna, jogador);
-		Pontuacao pontosVerticalAdv = avaliarVertical(linha, coluna, adversario);
-
-		Pontuacao pontosDiagonal = avaliarDiagonals(linha, coluna, jogador);
-		Pontuacao pontosDiagonalAdv = avaliarDiagonals(linha, coluna, adversario);
-		//achadosJogador.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, jogador));
-		//achadosAdversario
-		//		.add(buscarPosicoesParaAvaliacao(tabuleiro, linha, coluna, linhaMover, colunaMover, adversario));
-
-		posicao.setHeuristica(pontosHorizontal.total + pontosVertical.total + pontosDiagonal.total);
-
-		if (posicao.getHeuristica() > 1) {
-			System.out.println(posicao.getHeuristica());
+		if (posicao.heuristica > 1) {
+			System.out.println(posicao.heuristica);
 		}
 		return posicao;
 	}
 
-	private long avaliarPontuacao(Pontuacao pontuacao, boolean jogadorAtual) {
-		if (pontuacao.getAbertura() == 0 && pontuacao.getTotalJogador() < 5) {
-			return 0;
+	private double avaliarPontuacao(Pontuacao pontuacao) {
+		double total = 0;
+		double totalAdv = 0;
+
+		int dupla = 1;
+		int tripla = 1;
+		int duplaAdv = 1;
+		int triplaAdv = 1;
+		switch (pontuacao.totalJogador) {
+			case 1:
+				total = 1;
+				break;
+			case 2:
+				dupla++;
+				total = 200 / pontuacao.distancia;
+				break;
+			case 3:
+				tripla++;
+				total = 7000 / pontuacao.distancia;
+				break;
+			case 4:
+				total = 200000 / pontuacao.distancia;
+				break;
+			default:
+				total = 200000000;
 		}
-		long total = 0;
-		switch (pontuacao.getTotalJogador()) {
-		case 1:
-			switch (pontuacao.abertura) {
+
+		switch (pontuacao.totalAdversario) {
 			case 1:
-				return 0;
+				totalAdv = 1;
+				break;
 			case 2:
-				return 1;
-			}
-			//total++;
-			break;
-		case 2:
-			switch (pontuacao.abertura) {
-			case 1:
-				return 126 / 2;
-			case 2:
-				return 126;
-			}
-			break;
-		case 3:
-			switch (pontuacao.abertura) {
-			case 1:
-				if (jogadorAtual) {
-					return 6175 / 3;
-				}
-				return 6175 / 4;
-			case 2:
-				if (jogadorAtual) {
-					return 6175;
-				}
-				return 6175 / 2;
-			}
-			//total = total + 6175 / (pontuacao.getBloqueado() + 1);
-			break;
-		case 4:
-			switch (pontuacao.abertura) {
-			case 1:
-				if (jogadorAtual) {
-					return 154376 / 3;
-				}
-				return 154376 / 4;
-			case 2:
-				if (jogadorAtual) {
-					return 154376;
-				}
-				return 154376 / 2;
-			}
-			//total = total + 154376 / (pontuacao.getBloqueado() + 1);
-			break;
-		case 5:
-			total = Long.MAX_VALUE;
+				duplaAdv++;
+				totalAdv = 200;
+				break;
+			case 3:
+				triplaAdv++;
+				totalAdv = 7000;
+				break;
+			case 4:
+				totalAdv = 200000;
+				break;
+			default:
+				totalAdv = 200000000;
 		}
-		return total;
+
+		if (dupla > 1) {
+			total += Math.pow(200, dupla);
+		}
+		if (tripla > 1) {
+			total += Math.pow(7000, tripla);
+		}
+		if (duplaAdv > 1) {
+			totalAdv += Math.pow(200, duplaAdv);
+		}
+		if (triplaAdv > 1) {
+			totalAdv += Math.pow(7000, triplaAdv);
+		}
+		return total - totalAdv;
 	}
 
-	private Pontuacao avaliarDiagonals(int linha, int coluna, int jogador) {
+	private Pontuacao avaliarDiagonalMesmoSentido(Posicao posicao, int jogador) {
+		int linha = posicao.linha;
+		int coluna = posicao.coluna;
 		Pontuacao pontuacao = new Pontuacao();
-		for (int i = linha; i < 5; i++) {
-			int proximaLinha = linha + i;
-			int proximaColuna = coluna + i;
+		for (int i = linha, mover = 1; i < linha + 5; i++, mover++) {
+			int proximaLinha = linha + mover;
+			int proximaColuna = coluna + mover;
 			if (proximaLinha >= TOTAL_LINHAS || proximaColuna >= TOTAL_COLUNAS) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			} else {
-
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
 
-		for (int i = linha; i > 5; i--) {
-			int proximaLinha = linha - i;
-			int proximaColuna = coluna - i;
+		for (int i = linha, mover = 1; i > linha - 5; i--, mover++) {
+			int proximaLinha = linha - mover;
+			int proximaColuna = coluna - mover;
 			if (proximaLinha < 0 || proximaColuna < 0) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			} else {
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
 
-		for (int i = linha; i > 5; i--) {
-			int proximaLinha = linha - i;
-			int proximaColuna = coluna + i;
+		pontuacao.total = avaliarPontuacao(pontuacao);
+		return pontuacao;
+	}
+
+	private Pontuacao avaliarDiagonalInversa(Posicao posicao, int jogador) {
+		int linha = posicao.linha;
+		int coluna = posicao.coluna;
+		Pontuacao pontuacao = new Pontuacao();
+		for (int i = linha, mover = 1; i > linha - 5; i--, mover++) {
+			int proximaLinha = linha - mover;
+			int proximaColuna = coluna + mover;
 			if (proximaLinha < 0 || proximaColuna >= TOTAL_COLUNAS) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			} else {
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
 
-		for (int i = linha; i < 5; i++) {
-			int proximaLinha = linha + i;
-			int proximaColuna = coluna - i;
+		for (int i = linha, mover = 1; i < linha + 5; i++, mover++) {
+			int proximaLinha = linha + mover;
+			int proximaColuna = coluna - mover;
 			if (proximaLinha >= TOTAL_LINHAS || proximaColuna < 0) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			} else {
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
 
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
-	private Pontuacao avaliarVertical(int linha, int coluna, int jogador) {
+	private Pontuacao avaliarVertical(Posicao posicao, int jogador) {
+		int linha = posicao.linha;
+		int coluna = posicao.coluna;
 		Pontuacao pontuacao = new Pontuacao();
-		for (int i = linha; i < 5; i++) {
-			int proximaLinha = linha + i;
+		for (int i = linha, mover = 1; i < linha + 5; i++, mover++) {
+			int proximaLinha = linha + mover;
 			if (proximaLinha >= TOTAL_LINHAS) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			}
 			int proximaPosicao = tabuleiro[proximaLinha][coluna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
 
-		for (int i = linha; i > 5; i--) {
-			int proximaLinha = linha - i;
+		for (int i = linha, mover = 1; i > linha - 5; i--, mover++) {
+			int proximaLinha = linha - mover;
 			if (proximaLinha < 0) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			}
 			int proximaPosicao = tabuleiro[proximaLinha][coluna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
+
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
-	private Pontuacao avaliarHorizontal(int linha, int coluna, int jogador) {
+	private Pontuacao avaliarHorizontal(Posicao posicao, int jogador) {
+		int coluna = posicao.getColuna();
+		int linha = posicao.getLinha();
 		Pontuacao pontuacao = new Pontuacao();
-		for (int i = coluna; i < 5; i++) {
-			int proximaColuna = coluna + i;
+		for (int i = coluna, mover = 1; i < coluna + 5; i++, mover++) {
+			int proximaColuna = coluna + mover;
 			if (proximaColuna >= TOTAL_COLUNAS) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			}
 			int proximaPosicao = tabuleiro[linha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
 
-		for (int i = coluna; i > 5; i--) {
-			int proximaColuna = coluna - i;
+		for (int i = coluna, mover = 1; i > coluna - 5; i--, mover++) {
+			int proximaColuna = coluna - mover;
 			if (proximaColuna < 0) {
-				pontuacao.abertura--;
-				pontuacao.totalJogador--;
+				break;
 			}
 			int proximaPosicao = tabuleiro[linha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
+
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
 	private void avaliadorComum(int jogador, Pontuacao pontuacao, int proximaPosicao) {
 		if (proximaPosicao == jogador) {
 			pontuacao.totalJogador++;
-		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor() && pontuacao.totalJogador > 0) {
-			pontuacao.abertura++;
-			pontuacao.total += this.avaliarPontuacao(pontuacao, jogador == jogadorDaVez.getTipo().getValor());
-			pontuacao.totalJogador = 0;
-			pontuacao.abertura = 1;
-		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor()) {
-			pontuacao.abertura = 1;
-		} else if (pontuacao.totalJogador > 0) {
-			pontuacao.total += this.avaliarPontuacao(pontuacao, jogador == jogadorDaVez.getTipo().getValor());
+		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor() && pontuacao.totalJogador > 1) {
+			pontuacao.livre++;
+			pontuacao.distancia++;
+		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor() && pontuacao.totalJogador <= 1) {
+			pontuacao.distancia = 1;
 		} else {
-			pontuacao.totalJogador = 0;
+			pontuacao.totalAdversario++;
 		}
 	}
 
@@ -562,26 +467,6 @@ public class Gomoku {
 			}
 		}
 		return true;
-	}
-
-	// Helper pra buscar posicoes.
-	private int buscarPosicoesParaAvaliacao(int tabuleiro[][], int linhaInicial, int colunaInicial, int linhaMover,
-			int colunaMover, int valorBuscar) {
-		int totalAchado = 0;
-		for (int cont = 0; cont < TOTAL_PARA_GANHAR; cont++) {
-			int linha = linhaInicial + cont * linhaMover;
-			int coluna = colunaInicial + cont * colunaMover;
-			if (linha < 0 || coluna < 0 || linha >= TOTAL_LINHAS || coluna >= TOTAL_COLUNAS) {
-				return -1;
-			} else if (tabuleiro[linha][coluna] == JogadorTipo.LIVRE.getValor()) {
-				continue;
-			} else if (tabuleiro[linha][coluna] == valorBuscar) {
-				totalAchado++;
-			} else {
-				return -1;
-			}
-		}
-		return totalAchado;
 	}
 
 	private void passarVez() {
