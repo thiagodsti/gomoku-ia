@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+
 public class Gomoku {
 
 	private static final int PROFUNDIDADE = 5;
@@ -48,12 +49,6 @@ public class Gomoku {
 			this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 2);
 			Posicao melhorPosicao = minimax(this.ultimaPosicaoJogada, PROFUNDIDADE, true, MENOS_INFINITO,
 					MAIS_INFINITO);
-			this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 1);
-			Posicao melhorPosicao2 = minimax(this.ultimaPosicaoJogada, PROFUNDIDADE, true, MENOS_INFINITO,
-					MAIS_INFINITO);
-			if (melhorPosicao2.heuristica > melhorPosicao.heuristica) {
-				melhorPosicao = melhorPosicao2;
-			}
 			this.frame.encontrarBotao(melhorPosicao.getLinha(), melhorPosicao.getColuna()).doClick();
 		} else {
 			PosicaoBtn btn = this.frame.encontrarBotao(7, 7);
@@ -67,7 +62,7 @@ public class Gomoku {
 		List<Posicao> posicoesLivres = pegarFilhosProximos(posicao);
 
 		Posicao melhor;
-		if (profundidade == 0 || jogadorGanhou(tabuleiro, posicao.getJogador(), posicao.linha, posicao.coluna)) {
+		if (profundidade == 0 || jogadorGanhou(tabuleiro, jogadorDaVez.getTipo().getValor(), posicao.linha, posicao.coluna)) {
 			return avaliar(posicao);
 		} else {
 			for (Posicao filho : posicoesLivres) {
@@ -152,6 +147,7 @@ public class Gomoku {
 	// quadrupla-> 154.376
 	private Posicao avaliar(Posicao posicao) {
 		int jogador = posicao.getJogador();
+		//int jogador = jogadorDaVez.getTipo().getValor();
 
 		Pontuacao pontosHorizontal = avaliarHorizontal(posicao, jogador);
 		Pontuacao pontosVertical = avaliarVertical(posicao, jogador);
@@ -187,10 +183,10 @@ public class Gomoku {
 				total = 7000;
 				break;
 			case 4:
-				total = 200000;
+				total = 2000000;
 				break;
-			default:
-				total = 200000000;
+			case 5:
+				total = 2000000000;
 		}
 
 		switch (pontuacao.totalAdversario) {
@@ -206,10 +202,10 @@ public class Gomoku {
 				totalAdv = 7000;
 				break;
 			case 4:
-				totalAdv = 200000;
+				totalAdv = 2000000;
 				break;
 			case 5:
-				totalAdv = 200000000;
+				totalAdv = 2000000000;
 		}
 
 		if (dupla > 1) {
@@ -348,6 +344,7 @@ public class Gomoku {
 		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor() && pontuacao.totalJogador <= 1) {
 			pontuacao.distancia = 1;
 		} else {
+			pontuacao.totalJogador--;
 			pontuacao.totalAdversario++;
 		}
 	}
