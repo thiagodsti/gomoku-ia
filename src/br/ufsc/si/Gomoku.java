@@ -260,8 +260,8 @@ public class Gomoku {
 
 		int dupla = 0;
 		int tripla = 0;
-		int duplaAdv = 1;
-		int triplaAdv = 1;
+		int duplaAdv = 0;
+		int triplaAdv = 0;
 		
 		int distancia = pontuacao.distancia;
 		switch (pontuacao.totalJogador) {
