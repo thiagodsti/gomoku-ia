@@ -258,8 +258,8 @@ public class Gomoku {
 		double total = 0;
 		double totalAdv = 0;
 
-		int dupla = 1;
-		int tripla = 1;
+		int dupla = 0;
+		int tripla = 0;
 		int duplaAdv = 1;
 		int triplaAdv = 1;
 		
@@ -306,35 +306,35 @@ public class Gomoku {
 				totalAdv = 1;
 				break;
 			case 2:
-				dupla++;
+				duplaAdv++;
 				if (jogador == jogadorDaVez.getTipo().getValor()){
-					total = 200 / distancia;
+					totalAdv = 200 / distancia;
 				} else {
-					total = 100 / distancia;
-					dupla--;
+					totalAdv = 100 / distancia;
+					duplaAdv--;
 				}
 				break;
 			case 3:
-				tripla++;
+				triplaAdv++;
 				if (jogador == jogadorDaVez.getTipo().getValor()){
-					total = 7000 / distancia;
+					totalAdv = 7000 / distancia;
 				} else {
-					tripla--;
-					total = 300 / distancia;
+					triplaAdv--;
+					totalAdv = 300 / distancia;
 				}
 				break;
 			case 4:
 				if (jogador == jogadorDaVez.getTipo().getValor()){
-					total = 2000000 / distancia;
+					totalAdv = 2000000 / distancia;
 				} else {
-					total = 2000 / distancia;
+					totalAdv = 2000 / distancia;
 				}
 				break;
 			case 5:
 				if (jogador == jogadorDaVez.getTipo().getValor()){
-					total = 2000000000 / distancia;
+					totalAdv = 2000000000 / distancia;
 				} else {
-					total = 20000 / distancia;
+					totalAdv = 20000 / distancia;
 				}
 		}
 
