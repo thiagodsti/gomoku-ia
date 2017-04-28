@@ -6,10 +6,18 @@ public class Posicao {
 	int linha;
 	int coluna;
 	double heuristica;
+	
 
 	public Posicao(int linha, int coluna) {
 		this.setLinha(linha);
 		this.setColuna(coluna);
+	}
+
+
+	public Posicao(int linha, int coluna, double heuristica) {
+		this.setLinha(linha);
+		this.setColuna(coluna);
+		this.heuristica = heuristica;
 	}
 
 	public Posicao(int linha, int coluna, int jogador) {
