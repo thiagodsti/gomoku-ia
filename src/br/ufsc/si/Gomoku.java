@@ -82,20 +82,20 @@ public class Gomoku {
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.COMPUTADOR);
 					melhor = minimax(filho, profundidade - 1, false, alpha, beta);
 					if (melhorLinha == -1 || melhorColuna == -1 || melhor.heuristica > alpha) {
+						alpha = melhor.heuristica;
 						melhorValor = melhor.heuristica;
 						melhorLinha = melhor.getLinha();
 						melhorColuna = melhor.getColuna();
-						alpha = melhor.heuristica;
 					}
 				} else {
 					filho.setJogador(JogadorTipo.HUMANO.getValor());
 					moverPosicaoTabuleiroPrincipal(filho, JogadorTipo.HUMANO);
 					melhor = minimax(filho, profundidade - 1, true, alpha, beta);
-					if (melhorLinha == -1 || melhorColuna == -1 || melhor.heuristica < beta) {
+					if (melhor.heuristica < beta) {
+						beta = melhor.heuristica;
 						melhorValor = melhor.heuristica;
 						melhorLinha = melhor.getLinha();
 						melhorColuna = melhor.getColuna();
-						beta = melhor.heuristica;
 					}
 				}
 
@@ -269,8 +269,8 @@ public class Gomoku {
 				heuristica += pontosHorizontal.total + pontosVertical.total + pontosDiagonal.total
 						+ pontosDiagonalInversa.total;
 			} else {
-				heuristica -= pontosHorizontal.total + pontosVertical.total + pontosDiagonal.total
-						+ pontosDiagonalInversa.total;
+				heuristica -= pontosHorizontal.total - pontosVertical.total - pontosDiagonal.total
+						- pontosDiagonalInversa.total;
 			}
 		}
 		return heuristica;
@@ -285,47 +285,47 @@ public class Gomoku {
 		int distancia = pontuacao.distancia;
 		switch (pontuacao.totalJogador) {
 			case 1:
-				total += 1 * pontuacao.livre;
+				total += 1 * pontuacao.livre / pontuacao.bloqueado;
 				break;
 			case 2:
-				dupla++;
+				//dupla++;
 				if (jogador == jogadorDaVez.getTipo().getValor()) {
-					total += 200 / distancia;
+					total += 200 / distancia / pontuacao.bloqueado;
 				} else {
-					total += 100 / distancia;
-					dupla--;
+					total += 100 / distancia / pontuacao.bloqueado;
+					//dupla--;
 				}
 				break;
 			case 3:
-				tripla++;
+				//	tripla++;
 				if (jogador == jogadorDaVez.getTipo().getValor()) {
-					total += 7000 / distancia;
+					total += 7000000 / distancia / pontuacao.bloqueado;
 				} else {
-					total += 70000 / distancia;
-					tripla--;
+					total += 700000 / distancia / pontuacao.bloqueado;
+					//	tripla--;
 				}
 				break;
 			case 4:
 				if (jogador == jogadorDaVez.getTipo().getValor()) {
-					total += 20000000 / distancia;
+					total += 2000000 / distancia / pontuacao.bloqueado;
 				} else {
-					total += 2000 / distancia;
+					total += 200000 / distancia / pontuacao.bloqueado;
 				}
 				break;
 			case 5:
 				if (jogador == jogadorDaVez.getTipo().getValor()) {
-					total += MAIS_INFINITO;
+					total += MAIS_INFINITO / distancia / pontuacao.bloqueado;
 				} else {
-					total += 20000 / distancia;
+					total += 20000 / distancia / pontuacao.bloqueado;
 				}
 		}
 
-		if (dupla > 1) {
-			total += Math.pow(200, dupla);
-		}
-		if (tripla > 1) {
-			total += Math.pow(7000, tripla);
-		}
+		/*		if (dupla > 1) {
+					total += Math.pow(200, dupla);
+				}
+				if (tripla > 1) {
+					total += Math.pow(7000, tripla);
+				} */
 		return total;
 	}
 
@@ -337,22 +337,15 @@ public class Gomoku {
 			int proximaLinha = linha + mover;
 			int proximaColuna = coluna + mover;
 			if (proximaLinha >= TOTAL_LINHAS || proximaColuna >= TOTAL_COLUNAS) {
+				pontuacao.totalAdversario++;
 				break;
 			} else {
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
-
-		for (int i = linha, mover = 1; i > linha - 5; i--, mover++) {
-			int proximaLinha = linha - mover;
-			int proximaColuna = coluna - mover;
-			if (proximaLinha < 0 || proximaColuna < 0) {
-				break;
-			} else {
-				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
-				avaliadorComum(jogador, pontuacao, proximaPosicao);
-			}
+		if (pontuacao.totalAdversario > 0) {
+			pontuacao.bloqueado--;
 		}
 
 		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
@@ -367,24 +360,16 @@ public class Gomoku {
 			int proximaLinha = linha - mover;
 			int proximaColuna = coluna + mover;
 			if (proximaLinha < 0 || proximaColuna >= TOTAL_COLUNAS) {
+				pontuacao.totalAdversario++;
 				break;
 			} else {
 				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 				avaliadorComum(jogador, pontuacao, proximaPosicao);
 			}
 		}
-
-		for (int i = linha, mover = 1; i < linha + 5; i++, mover++) {
-			int proximaLinha = linha + mover;
-			int proximaColuna = coluna - mover;
-			if (proximaLinha >= TOTAL_LINHAS || proximaColuna < 0) {
-				break;
-			} else {
-				int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
-				avaliadorComum(jogador, pontuacao, proximaPosicao);
-			}
+		if (pontuacao.totalAdversario > 0) {
+			pontuacao.bloqueado--;
 		}
-
 		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
 		return pontuacao;
 	}
@@ -396,19 +381,14 @@ public class Gomoku {
 		for (int i = linha, mover = 1; i < linha + 5; i++, mover++) {
 			int proximaLinha = linha + mover;
 			if (proximaLinha >= TOTAL_LINHAS) {
+				pontuacao.totalAdversario++;
 				break;
 			}
 			int proximaPosicao = tabuleiro[proximaLinha][coluna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
-
-		for (int i = linha, mover = 1; i > linha - 5; i--, mover++) {
-			int proximaLinha = linha - mover;
-			if (proximaLinha < 0) {
-				break;
-			}
-			int proximaPosicao = tabuleiro[proximaLinha][coluna];
-			avaliadorComum(jogador, pontuacao, proximaPosicao);
+		if (pontuacao.totalAdversario > 0) {
+			pontuacao.bloqueado--;
 		}
 
 		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
@@ -422,25 +402,14 @@ public class Gomoku {
 		for (int i = coluna, mover = 1; i < coluna + 5; i++, mover++) {
 			int proximaColuna = coluna + mover;
 			if (proximaColuna >= TOTAL_COLUNAS) {
+				pontuacao.totalAdversario++;
 				break;
 			}
 			int proximaPosicao = tabuleiro[linha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
-			if (pontuacao.totalAdversario > 0) {
-				pontuacao.abertura--;
-			}
 		}
-
-		for (int i = coluna, mover = 1; i > coluna - 5; i--, mover++) {
-			int proximaColuna = coluna - mover;
-			if (proximaColuna < 0) {
-				break;
-			}
-			int proximaPosicao = tabuleiro[linha][proximaColuna];
-			avaliadorComum(jogador, pontuacao, proximaPosicao);
-			if (pontuacao.totalAdversario > 0) {
-				pontuacao.abertura--;
-			}
+		if (pontuacao.totalAdversario > 0) {
+			pontuacao.bloqueado--;
 		}
 
 		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
@@ -454,7 +423,6 @@ public class Gomoku {
 			pontuacao.distancia++;
 			pontuacao.livre++;
 		} else if (proximaPosicao == JogadorTipo.LIVRE.getValor() && pontuacao.totalJogador <= 1) {
-			pontuacao.distancia = 1;
 			pontuacao.livre++;
 		} else if (proximaPosicao == JogadorTipo.COMPUTADOR.getValor()) {
 			pontuacao.totalAdversario++;
