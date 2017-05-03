@@ -263,7 +263,7 @@ public class Gomoku {
 		return heuristica;
 	}
 
-	private double avaliarPontuacao(Pontuacao pontuacao, int jogador) {
+	private double avaliarPontuacao(Pontuacao pontuacao) {
 		double total = 0;
 		total += pontuacao.umFechado * 0.5;
 		total += pontuacao.um * 1;
@@ -293,7 +293,7 @@ public class Gomoku {
 			int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
-		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
@@ -313,7 +313,7 @@ public class Gomoku {
 			int proximaPosicao = tabuleiro[proximaLinha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
-		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
@@ -331,7 +331,7 @@ public class Gomoku {
 			int proximaPosicao = tabuleiro[proximaLinha][coluna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
-		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
@@ -349,7 +349,7 @@ public class Gomoku {
 			int proximaPosicao = tabuleiro[linha][proximaColuna];
 			avaliadorComum(jogador, pontuacao, proximaPosicao);
 		}
-		pontuacao.total = avaliarPontuacao(pontuacao, jogador);
+		pontuacao.total = avaliarPontuacao(pontuacao);
 		return pontuacao;
 	}
 
