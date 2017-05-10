@@ -2,11 +2,9 @@ package br.ufsc.si;
 
 public class Pontuacao {
 
-	int bloqueado = 2;
+	int bloqueado = 0;
 	int totalJogador = 0;
-	int totalAdversario;
-	int livre;
-	int distancia = 1;
+	int livre = 0;
 	int umFechado=0;
 	int um = 0;
 	int doisFechado=0;

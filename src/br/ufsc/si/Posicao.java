@@ -6,6 +6,7 @@ public class Posicao {
 	int linha;
 	int coluna;
 	double heuristica;
+	Pontuacao pontuacao;
 	
 
 	public Posicao(int linha, int coluna) {
