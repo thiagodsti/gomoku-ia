@@ -23,7 +23,7 @@ public class Gomoku {
 	private int melhorLinha = -1;
 	private int melhorColuna = -1;
 
-	public void iniciarJogo(TabuleiroFrame frame) {
+	public void iniciarJogo(TabuleiroFrame frame, String resposta) {
 		this.frame = frame;
 		jogador1 = new Jogador();
 		jogador1.setPeca("C");
@@ -33,7 +33,11 @@ public class Gomoku {
 		jogador2.setPeca("H");
 		jogador2.setTipo(JogadorTipo.HUMANO);
 
-		jogadorDaVez = jogador1;
+		if (resposta.toUpperCase().equals("C")){
+			jogadorDaVez = jogador1;
+		} else {
+			jogadorDaVez = jogador2;
+		}
 
 		jogadas = new ArrayList<>();
 
@@ -47,7 +51,11 @@ public class Gomoku {
 	private void jogarComputador() {
 		int totalJogadas = jogadas.size();
 		if (totalJogadas > 0) {
-			this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 2);
+			if (jogadas.size()==1) {
+				this.ultimaPosicaoJogada = jogadas.get(0);
+			} else {
+				this.ultimaPosicaoJogada = jogadas.get(totalJogadas - 2);
+			}
 			minimax(this.ultimaPosicaoJogada, PROFUNDIDADE, true, MENOS_INFINITO, MAIS_INFINITO, 0);
 			this.frame.encontrarBotao(melhorLinha, melhorColuna).doClick();
 		} else {

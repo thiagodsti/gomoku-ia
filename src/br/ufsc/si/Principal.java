@@ -2,6 +2,8 @@ package br.ufsc.si;
 
 import java.awt.EventQueue;
 
+import javax.swing.JOptionPane;
+
 public class Principal {
 
 	/**
@@ -12,7 +14,14 @@ public class Principal {
 			try {
 				Gomoku gomoku = new Gomoku();
 				TabuleiroFrame frame = new TabuleiroFrame(gomoku);
-				gomoku.iniciarJogo(frame);
+				String resposta = "";
+				do {
+					resposta = JOptionPane.showInputDialog(frame, "Quem deve iniciar jogando H para Humano e C para Computador?");
+					if (!resposta.toUpperCase().equals("H") && !resposta.toUpperCase().equals("C")){
+						JOptionPane.showMessageDialog(frame, "Resposta inválida");
+					}
+				} while (!resposta.toUpperCase().equals("H") && !resposta.toUpperCase().equals("C"));
+				gomoku.iniciarJogo(frame, resposta);
 				frame.setVisible(true);
 			} catch (Exception e) {
 				e.printStackTrace();
